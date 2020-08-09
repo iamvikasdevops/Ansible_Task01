@@ -1,0 +1,54 @@
+- hosts: 192.168.43.145
+  tasks:
+   - yum_repository: 
+                baseurl: https://centos.pkgs.org/7/docker-ce-test-x86_64/
+                name: "dockerrepo"
+                description: "dockerrepo"
+   - package:
+          name: docker-ce 
+          state: present
+   - command: setenforce 0 
+   - service:
+         name: docker
+         state: started
+   - yum:
+      name: python3-pip
+      state: present 
+   - pip:
+      name: docker
+
+   - docker_image: 
+              name: httpd
+              source: pull
+              tag: latest  
+                            
+   - file:
+       path: /task1
+       state: directory
+
+   - docker_container:
+                  name: web-container
+                  image: httpd
+                  state: started
+                  volumes: /task1/:/usr/local/apache2/htdocs/
+                  exposed_ports: 
+                            - 80
+                             
+                  ports: 
+                        - "9000:80"
+               
+                      
+                          
+
+     register: x
+
+   - debug:
+        var: x  
+   - template:
+         src: task1.html
+         dest: /task1
+
+   - debug: 
+       var: x
+
+
